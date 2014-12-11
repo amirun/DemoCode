@@ -1,410 +1,428 @@
-<?php 
-        session_start();
-        header( 'Content-Type: text/html; charset=utf-8' );
-        include_once('../../include/connection.php');
-        $username = $_SESSION['username'];
-    //    echo $username;
-        if($username == '' || $username == null)
-        {
-                die(include'../../error/error.php');
-        }
-?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" >
-    <head>
-        <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
-        <title>Add New Customer</title>
-        <script type="text/javascript" src="../../js/jquery-1.11.1.min.js"></script>
-        <style>
-            .asterik{
-                color: red;
+<?php
+    include_once('../../include/connection.php');
+    //echo '>'.empty($_POST['amtp'])."=====".empty($_POST['amtr']).'<' ;
+    
+    !empty($_POST['nameEn'])?$nameEn= mysqli_real_escape_string ( $con, $_POST['nameEn'] ):$nameEn='NULL';
+    !empty($_POST['nameHi'])?$nameHi= mysqli_real_escape_string ( $con, $_POST['nameHi'] ):$nameHi='NULL';
+    !empty($_POST['addr'])?$addr= mysqli_real_escape_string ( $con, $_POST['addr'] ):$addr='NULL';
+    !empty($_POST['local'])?$local= mysqli_real_escape_string ( $con, $_POST['local'] ):$local='NULL';
+    !empty($_POST['city'])?$city= mysqli_real_escape_string ( $con, $_POST['city'] ):$city='NULL';
+    !empty($_POST['vill'])?$vill= mysqli_real_escape_string ( $con, $_POST['vill'] ):$vill='NULL';
+    !empty($_POST['state'])?$state= mysqli_real_escape_string ( $con, $_POST['state'] ):$state='NULL';
+    !empty($_POST['pin'])?$pin= mysqli_real_escape_string ( $con, $_POST['pin'] ):$pin='NULL';
+    !empty($_POST['amtp'])?$amtp= mysqli_real_escape_string ( $con, $_POST['amtp'] ):$amtp='NULL';
+    !empty($_POST['amtr'])?$amtr= mysqli_real_escape_string ( $con, $_POST['amtr'] ):$amtr='NULL';
+    !empty($_POST['phone'])?$phone= mysqli_real_escape_string ( $con, $_POST['phone'] ):$phone='NULL';
+    !empty($_POST['comnt'])?$comnt= mysqli_real_escape_string ( $con, $_POST['comnt'] ):$comnt='NULL';
+    $insertSTATUS=false;
+    if($nameEn != 'NULL'){
+        $get_custid = "SELECT MAX(`custid`) AS lastcust FROM `customer`";
+        $query_result1 = mysqli_query($con,$get_custid);
+
+        $next_custid = intval(mysqli_fetch_assoc($query_result1)['lastcust'])+1;
+        echo 'next custid='.$next_custid;
+        $insertSTATUS = TRUE;
+        //echo '>'.$_POST['amtp']."=====".$_POST['amtr'].'<' ;
+        $cust_insert_query="INSERT INTO `customer`(`custid`,`cust_name`, `cust_name_hi`, `amount_remaining`, `amount_payable`, `DOC`, `DOM`, `comment`, `phone`) "
+                    ."VALUES ($next_custid,'$nameEn','$nameHi',$amtr,$amtp,CURDATE(),CURDATE(),'$comnt','$phone')";
+        $query_result2 = mysqli_query($con,$cust_insert_query);
+        echo 'cust_insert_query ='.$cust_insert_query;
+        if(!$query_result2){
+           $insertSTATUS = FALSE;
+        }
+
+        if($insertSTATUS){
+            $addr_insert_query = "INSERT INTO `address`(`custid`, `address`, `locality`, `village`, `city`, `state`, `pincode`) "
+                            ."VALUES ($next_custid,'$addr','$local','$vill','$city','$state','$pin')";
+            $query_result3 = mysqli_query($con,$addr_insert_query);
+            echo 'addr_insert_query='.$addr_insert_query;
+            if(!$query_result3){
+               $insertSTATUS = FALSE;
+               $_POST = array();
             }
-            #textHi1{
-                position: relative;
+        }
+    }
+//    isset($_POST[nameEn])?$nameEn = mysql_realEscapeSt:=;
+?>
+<head>
+<title>ADD CUST PHP</title>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+<script type="text/javascript" src="../../js/jquery-1.11.1.min.js"></script>
+<script language=javascript type="text/javascript">
+
+var IsValid = false;
+var IsCaps = false;
+var IsShift = false;
+
+var VirtualKey = {
+'113':'ौ','119':'ै','101':'ा','114':'ी','116':'ू','121':'ब','117':'ह','105':'ग','111':'द','112':'ज',
+'97':'ो','115':'े','100':'्','102':'ि','103':'ु','104':'प','106':'र','107':'क','108':'त',
+'122':'','120':'ं','99':'म','118':'न','98':'व','110':'ल','109':'स',
+'81':'औ','87':'ऐ','69':'आ','82':'ई','84':'ऊ','89':'भ','85':'ङ','73':'घ','79':'ध','80':'झ',
+'65':'ओ','83':'ए','68':'अ','70':'इ','71':'उ','72':'फ','74':'ऱ','75':'ख','76':'थ',
+'90':'','88':'ँ','67':'ण','86':'','66':'','78':'ळ','77':'श',
+'96':'`','49':'1','50':'2','51':'3','52':'4','53':'5','54':'6','55':'7','56':'8','57':'9','48':'0','45':'-','61':'ृ','92':'ॉ',
+'91':'ड','93':'़',
+'59':'च','39':'ट',
+'44':',','46':'.','47':'य',
+'126':'','33':'ऍ','64':'ॅ','35':'्','36':'र्','37':'ज्ञ','94':'त्र','38':'क्ष','42':'श्र','40':'(','41':')','95':'ः','43':'ॠ','124':'ऑ',
+'123':'ढ','125':'ञ',
+'58':'छ','34':'ठ',
+'60':'ष','62':'।','63':'य़',
+'32':' '};
+
+var VirtualKeyCaps = {
+'113':'ौ','119':'ै','101':'ा','114':'ी','116':'ू','121':'ब','117':'ह','105':'ग','111':'द','112':'ज',
+'97':'ो','115':'े','100':'्','102':'ि','103':'ु','104':'प','106':'र','107':'क','108':'त',
+'122':'','120':'ं','99':'म','118':'न','98':'व','110':'ल','109':'स',
+'81':'औ','87':'ऐ','69':'आ','82':'ई','84':'ऊ','89':'भ','85':'ङ','73':'घ','79':'ध','80':'झ',
+'65':'ओ','83':'ए','68':'अ','70':'इ','71':'उ','72':'फ','74':'ऱ','75':'ख','76':'थ',
+'90':'','88':'ँ','67':'ण','86':'','66':'','78':'ळ','77':'श',
+'96':'','49':'ऍ','50':'ॅ','51':'्','52':'र्','53':'ज्ञ','54':'त्र','55':'क्ष','56':'श्र','57':'(','48':')','45':'ः','61':'ॠ','92':'ऑ',
+'91':'ढ','93':'ञ',
+'59':'छ','39':'ठ',
+'44':'ष','46':'।','47':'य़',
+'126':'','33':'1','64':'2','35':'3','36':'4','37':'5','94':'6','38':'7','42':'8','40':'9','41':'0','95':'-','43':'ृ','124':'ॉ',
+'123':'ड','125':'़',
+'58':'च','34':'ट',
+'60':',','62':'.','63':'य',
+'32':' '};
+
+var LeftButton = {
+'81':'31','87':'51','69':'71','82':'91','84':'111','89':'131','85':'151','73':'171','79':'191','80':'211',
+'65':'37','83':'57','68':'77','70':'97','71':'117','72':'137','74':'157','75':'177','76':'197',
+'90':'47','88':'67','67':'87','86':'107','66':'127','78':'147','77':'167',
+'96':'0','49':'20','50':'40','51':'60','52':'80','53':'100','54':'120','55':'140','56':'160','57':'180','48':'200','189':'220','187':'240','220':'260',
+'192':'0','33':'20','64':'40','35':'60','36':'80','37':'100','94':'120','38':'140','42':'160','40':'180','41':'200','95':'220','43':'240','124':'260',
+'219':'231','221':'251',
+'186':'217','222':'237',
+'188':'187','190':'207','191':'227',
+'32':' '};
+
+var TopButton = {
+'81':'20','87':'20','69':'20','82':'20','84':'20','89':'20','85':'20','73':'20','79':'20','80':'20',
+'65':'40','83':'40','68':'40','70':'40','71':'40','72':'40','74':'40','75':'40','76':'40',
+'90':'60','88':'60','67':'60','86':'60','66':'60','78':'60','77':'60',
+'96':'0','49':'0','50':'0','51':'0','52':'0','53':'0','54':'0','55':'0','56':'0','57':'0','48':'0','189':'0','187':'0','220':'0',
+'192':'0','33':'0','64':'0','35':'0','36':'0','37':'0','94':'0','38':'0','42':'0','40':'0','41':'0','95':'0','43':'0','124':'0',
+'219':'20','221':'20',
+'186':'40','222':'40',
+'188':'60','190':'60','191':'60',
+'32':' '};
+
+var ValidButton = {
+'81':'1','87':'1','69':'1','82':'1','84':'1','89':'1','85':'1','73':'1','79':'1','80':'1',
+'65':'1','83':'1','68':'1','70':'1','71':'1','72':'1','74':'1','75':'1','76':'1',
+'90':'1','88':'1','67':'1','86':'1','66':'1','78':'1','77':'1',
+'96':'0','49':'0','50':'0','51':'0','52':'0','53':'0','54':'0','55':'0','56':'0','57':'0','48':'0','189':'0','187':'0','220':'0',
+'192':'0','33':'0','64':'0','35':'0','36':'0','37':'0','94':'0','38':'0','42':'0','40':'0','41':'0','95':'0','43':'0','124':'0',
+'219':'1','221':'1',
+'186':'1','222':'1',
+'188':'1','190':'1','191':'1',
+'32':' ',
+'8':'1','9':'1','13':'1','16':'1','20':'1','46':'1' };
+ 
+var selectedField=null;
+
+function checkCode(evt) 
+{
+	var kcode=0;
+	
+	if (document.all) 
+	{
+		var evt=window.event;
+		kcode=evt.keyCode; 	
+	} 
+	else kcode=evt.which;
+	
+	if(ValidButton[kcode]){ButtonDown(kcode); IsValid=true;}else{IsValid=false;};
+}
+
+function reset()
+{ 
+	if(!IsCaps && !IsShift)
+	{
+		document.getElementById('normal').style.visibility="visible";
+		document.getElementById('shift').style.visibility="hidden";
+		document.getElementById('caps').style.visibility="hidden";
+	}
+	else if(IsCaps && !IsShift)
+	{
+		document.getElementById('normal').style.visibility="hidden";
+		document.getElementById('shift').style.visibility="hidden";
+		document.getElementById('caps').style.visibility="visible";
+		
+		document.getElementById('capsS').style.visibility="visible";
+	}
+	else if(!IsCaps && IsShift)
+	{
+		document.getElementById('normal').style.visibility="hidden";
+		document.getElementById('shift').style.visibility="visible";
+		document.getElementById('caps').style.visibility="hidden";			
+	}
+	else if(IsCaps && IsShift)
+	{
+		document.getElementById('normal').style.visibility="visible";
+		document.getElementById('shift').style.visibility="hidden";
+		document.getElementById('caps').style.visibility="hidden";
+		
+		document.getElementById('capsS').style.visibility="visible";	
+	}	
+}
+
+function restoreCode(evt)
+{ 
+	var kcode=0;
+	
+	if (document.all) 
+	{
+		var evt=window.event;
+		kcode=evt.keyCode; 	
+	} 
+	else kcode=evt.which;
+	
+	ButtonUp(kcode);
+}
+
+function writeKeyPressed(evt) 
+{
+	var kcode=0;
+	
+	if (document.all) 
+	{
+		var evt=window.event;
+		kcode=evt.keyCode; 	
+	} 
+	else kcode=evt.which;
+	
+	InsertChar('k',kcode);
+	
+	return false;	
+};
+
+function InsertChar(mode,c)
+{
+    var TempStr ='';
+	
+	if ( ( c >= 65 && c <= 90 ) && !IsShift ) 
+	{
+		IsCaps = true;
+	} 
+	else if ( ( c >= 97 && c <= 122 ) && IsShift ) 
+	{
+		IsCaps = true;
+	} 
+	else if ( ( c >= 65 && c <= 90 ) || ( c >= 97 && c <= 122 ) ) 
+	{
+		IsCaps = false;
+	}
+	reset();	
+	
+	if(!IsCaps && !IsShift)
+	{
+		TempStr=VirtualKey[c];
+	}
+	else if(IsCaps && !IsShift)
+	{
+		TempStr=VirtualKeyCaps[c]; 
+	}
+	else if(!IsCaps && IsShift)
+	{
+		TempStr=VirtualKey[c];
+	}
+	else if(IsCaps && IsShift)
+	{
+	    if(mode=='k')
+	    {
+		    TempStr=VirtualKeyCaps[c];
+		}
+		else if(mode=='m')
+		{
+		    TempStr=VirtualKey[c];
+		}
+		else
+		{
+		    document.getElementById(selectedField).value = c+' '+IsCaps+' '+IsShift+' '+mode;
+		}
+	}
+	
+	if(TempStr != undefined)
+	document.getElementById(selectedField).value = document.getElementById(selectedField).value+TempStr;
+	document.getElementById(selectedField).focus();
+	
+//	self.parent.updateText(document.getElementById('txtHindi').value);
+}
+
+function ButtonDown(c)
+{
+	if(c==8)
+	{
+		document.getElementById('bSpace').style.visibility="visible";
+	}
+	else if(c==9)
+	{
+		document.getElementById('tab').style.visibility="visible";
+	}
+	else if(c==13)
+	{
+		document.getElementById('enter').style.visibility="visible";
+	}
+	else if(c==16)
+	{
+		IsShift=true;
+		document.getElementById('ShiftL').style.visibility="visible";
+		document.getElementById('ShiftR').style.visibility="visible";
+	}
+	else if(c==20)
+	{
+		IsCaps = !IsCaps;
+		document.getElementById('capsS').style.visibility="visible";
+	}
+	else if(c==32)
+	{
+		document.getElementById('Space').style.visibility="visible";
+	}
+	else if(c==46)
+	{
+		document.getElementById('delete').style.visibility="visible";
+	}
+	else
+	{
+		document.getElementById('Butt').style.left=LeftButton[c]+'px';
+		document.getElementById('Butt').style.top=TopButton[c]+'px';
+		document.getElementById('Butt').style.visibility="visible";
+	}
+	reset();
+}
+
+function ButtonUp(c)
+{
+	if(c==16)
+	{
+		IsShift=false;
+	}
+	
+	reset();
+	
+	document.getElementById('Butt').style.visibility="hidden";
+	document.getElementById('Space').style.visibility="hidden";
+	document.getElementById('bSpace').style.visibility="hidden";
+	document.getElementById('delete').style.visibility="hidden";
+	document.getElementById('enter').style.visibility="hidden";
+	document.getElementById('tab').style.visibility="hidden";
+	if(!IsShift)
+	{
+		document.getElementById('ShiftL').style.visibility="hidden";
+		document.getElementById('ShiftR').style.visibility="hidden";
+	}
+	if(!IsCaps)
+	{
+		document.getElementById('capsS').style.visibility="hidden";
+	}
+	
+	document.getElementById(selectedField).focus();
+}
+
+function Shift()
+{
+	if(document.getElementById('normal').style.visibility=="visible")
+	{
+		document.getElementById('normal').style.visibility="hidden";
+		document.getElementById('shift').style.visibility="visible";
+	}
+	else
+	{
+		document.getElementById('normal').style.visibility="visible";
+		document.getElementById('shift').style.visibility="hidden";
+	}
+}
+
+//function showKeyboard(field,div){
+//    changeField(field);
+//    if(selectedField != null){
+//        divElem = document.getElementById(div);
+//        visibilty = div.style.visibility;
+//        divElem.innerHTML = inner;
+//        if(visibilty == 'hidden'){
+//            mainKB.style.visibility = "visible";
+//            document.getElementById('top').style.visibility = "visible";
+//            document.getElementById('normal').style.visibility = "visible";
+//        }
+//        else{
+//            mainKB.style.visibility = "hidden";
+//            document.getElementById('top').style.visibility = "hidden";
+//            document.getElementById('normal').style.visibility = "hidden";
+//        }
+//    }
+////    document.getElementById('mainKeyboard').toggle();
+//   // document.getElementById('top').style.visibility="visible"  
+//}
+
+function showKeyboard(field,div,focusStatte){
+    //var curElement = document.activeElement.getAttribute('id');
+    changeField(field);
+
+    //alert(document.getElementById(div));
+    if(selectedField != null){
+        divElem = document.getElementById(div);
+        visibilty = divElem.style.visibility;
+//        console.log("texthi1:"+document.getElementById("textHi1").style.visibility);
+//        console.log("texthi2:"+document.getElementById("textHi2").style.visibility);
+//        if(visibilty == 'hidden'){
+        if(focusStatte == 'in'){    
+            divElem.innerHTML = inner;
+            divElem.style.visibility = "visible";
+            //divElem.style.dislay = "block";
+            document.getElementById('top').style.visibility = "visible";
+            document.getElementById('normal').style.visibility = "visible";
+        }
+        else{
+            var curElement = document.activeElement.getAttribute('id');
+            if(curElement == 'normal'||curElement == 'shift'||curElement == 'caps'){
+                return;
             }
-        </style>
-        <script language=javascript type="text/javascript">
-
-            var IsValid = false;
-            var IsCaps = false;
-            var IsShift = false;
-
-            var VirtualKey = {
-            '113':'ौ','119':'ै','101':'ा','114':'ी','116':'ू','121':'ब','117':'ह','105':'ग','111':'द','112':'ज',
-            '97':'ो','115':'े','100':'्','102':'ि','103':'ु','104':'प','106':'र','107':'क','108':'त',
-            '122':'','120':'ं','99':'म','118':'न','98':'व','110':'ल','109':'स',
-            '81':'औ','87':'ऐ','69':'आ','82':'ई','84':'ऊ','89':'भ','85':'ङ','73':'घ','79':'ध','80':'झ',
-            '65':'ओ','83':'ए','68':'अ','70':'इ','71':'उ','72':'फ','74':'ऱ','75':'ख','76':'थ',
-            '90':'','88':'ँ','67':'ण','86':'','66':'','78':'ळ','77':'श',
-            '96':'`','49':'1','50':'2','51':'3','52':'4','53':'5','54':'6','55':'7','56':'8','57':'9','48':'0','45':'-','61':'ृ','92':'ॉ',
-            '91':'ड','93':'़',
-            '59':'च','39':'ट',
-            '44':',','46':'.','47':'य',
-            '126':'','33':'ऍ','64':'ॅ','35':'्','36':'र्','37':'ज्ञ','94':'त्र','38':'क्ष','42':'श्र','40':'(','41':')','95':'ः','43':'ॠ','124':'ऑ',
-            '123':'ढ','125':'ञ',
-            '58':'छ','34':'ठ',
-            '60':'ष','62':'।','63':'य़',
-            '32':' '};
-
-            var VirtualKeyCaps = {
-            '113':'ौ','119':'ै','101':'ा','114':'ी','116':'ू','121':'ब','117':'ह','105':'ग','111':'द','112':'ज',
-            '97':'ो','115':'े','100':'्','102':'ि','103':'ु','104':'प','106':'र','107':'क','108':'त',
-            '122':'','120':'ं','99':'म','118':'न','98':'व','110':'ल','109':'स',
-            '81':'औ','87':'ऐ','69':'आ','82':'ई','84':'ऊ','89':'भ','85':'ङ','73':'घ','79':'ध','80':'झ',
-            '65':'ओ','83':'ए','68':'अ','70':'इ','71':'उ','72':'फ','74':'ऱ','75':'ख','76':'थ',
-            '90':'','88':'ँ','67':'ण','86':'','66':'','78':'ळ','77':'श',
-            '96':'','49':'ऍ','50':'ॅ','51':'्','52':'र्','53':'ज्ञ','54':'त्र','55':'क्ष','56':'श्र','57':'(','48':')','45':'ः','61':'ॠ','92':'ऑ',
-            '91':'ढ','93':'ञ',
-            '59':'छ','39':'ठ',
-            '44':'ष','46':'।','47':'य़',
-            '126':'','33':'1','64':'2','35':'3','36':'4','37':'5','94':'6','38':'7','42':'8','40':'9','41':'0','95':'-','43':'ृ','124':'ॉ',
-            '123':'ड','125':'़',
-            '58':'च','34':'ट',
-            '60':',','62':'.','63':'य',
-            '32':' '};
-
-            var LeftButton = {
-            '81':'31','87':'51','69':'71','82':'91','84':'111','89':'131','85':'151','73':'171','79':'191','80':'211',
-            '65':'37','83':'57','68':'77','70':'97','71':'117','72':'137','74':'157','75':'177','76':'197',
-            '90':'47','88':'67','67':'87','86':'107','66':'127','78':'147','77':'167',
-            '96':'0','49':'20','50':'40','51':'60','52':'80','53':'100','54':'120','55':'140','56':'160','57':'180','48':'200','189':'220','187':'240','220':'260',
-            '192':'0','33':'20','64':'40','35':'60','36':'80','37':'100','94':'120','38':'140','42':'160','40':'180','41':'200','95':'220','43':'240','124':'260',
-            '219':'231','221':'251',
-            '186':'217','222':'237',
-            '188':'187','190':'207','191':'227',
-            '32':' '};
-
-            var TopButton = {
-            '81':'20','87':'20','69':'20','82':'20','84':'20','89':'20','85':'20','73':'20','79':'20','80':'20',
-            '65':'40','83':'40','68':'40','70':'40','71':'40','72':'40','74':'40','75':'40','76':'40',
-            '90':'60','88':'60','67':'60','86':'60','66':'60','78':'60','77':'60',
-            '96':'0','49':'0','50':'0','51':'0','52':'0','53':'0','54':'0','55':'0','56':'0','57':'0','48':'0','189':'0','187':'0','220':'0',
-            '192':'0','33':'0','64':'0','35':'0','36':'0','37':'0','94':'0','38':'0','42':'0','40':'0','41':'0','95':'0','43':'0','124':'0',
-            '219':'20','221':'20',
-            '186':'40','222':'40',
-            '188':'60','190':'60','191':'60',
-            '32':' '};
-
-            var ValidButton = {
-            '81':'1','87':'1','69':'1','82':'1','84':'1','89':'1','85':'1','73':'1','79':'1','80':'1',
-            '65':'1','83':'1','68':'1','70':'1','71':'1','72':'1','74':'1','75':'1','76':'1',
-            '90':'1','88':'1','67':'1','86':'1','66':'1','78':'1','77':'1',
-            '96':'0','49':'0','50':'0','51':'0','52':'0','53':'0','54':'0','55':'0','56':'0','57':'0','48':'0','189':'0','187':'0','220':'0',
-            '192':'0','33':'0','64':'0','35':'0','36':'0','37':'0','94':'0','38':'0','42':'0','40':'0','41':'0','95':'0','43':'0','124':'0',
-            '219':'1','221':'1',
-            '186':'1','222':'1',
-            '188':'1','190':'1','191':'1',
-            '32':' ',
-            '8':'1','9':'1','13':'1','16':'1','20':'1','46':'1' };
-
-            var selectedField=null;
-
-            function checkCode(evt) 
-            {
-                var kcode=0;
-
-                if (document.all) 
-                {
-                    var evt=window.event;
-                    kcode=evt.keyCode; 	
-                } 
-                else kcode=evt.which;
-
-                if(ValidButton[kcode]){ButtonDown(kcode); IsValid=true;}else{IsValid=false;};
-            }
-
-            function reset()
-            { 
-                if(!IsCaps && !IsShift)
-                {
-                    document.getElementById('normal').style.visibility="visible";
-                    document.getElementById('shift').style.visibility="hidden";
-                    document.getElementById('caps').style.visibility="hidden";
-                }
-                else if(IsCaps && !IsShift)
-                {
-                    document.getElementById('normal').style.visibility="hidden";
-                    document.getElementById('shift').style.visibility="hidden";
-                    document.getElementById('caps').style.visibility="visible";
-
-                    document.getElementById('capsS').style.visibility="visible";
-                }
-                else if(!IsCaps && IsShift)
-                {
-                    document.getElementById('normal').style.visibility="hidden";
-                    document.getElementById('shift').style.visibility="visible";
-                    document.getElementById('caps').style.visibility="hidden";			
-                }
-                else if(IsCaps && IsShift)
-                {
-                    document.getElementById('normal').style.visibility="visible";
-                    document.getElementById('shift').style.visibility="hidden";
-                    document.getElementById('caps').style.visibility="hidden";
-
-                    document.getElementById('capsS').style.visibility="visible";	
-                }	
-            }
-
-            function restoreCode(evt)
-            { 
-                var kcode=0;
-
-                if (document.all) 
-                {
-                    var evt=window.event;
-                    kcode=evt.keyCode; 	
-                } 
-                else kcode=evt.which;
-
-                ButtonUp(kcode);
-            }
-
-            function writeKeyPressed(evt) 
-            {
-                var kcode=0;
-
-                if (document.all) 
-                {
-                    var evt=window.event;
-                    kcode=evt.keyCode; 	
-                } 
-                else kcode=evt.which;
-
-                InsertChar('k',kcode);
-
-                return false;	
-            };
-
-            function InsertChar(mode,c)
-            {
-                var TempStr ='';
-
-                    if ( ( c >= 65 && c <= 90 ) && !IsShift ) 
-                    {
-                        IsCaps = true;
-                    } 
-                    else if ( ( c >= 97 && c <= 122 ) && IsShift ) 
-                    {
-                        IsCaps = true;
-                    } 
-                    else if ( ( c >= 65 && c <= 90 ) || ( c >= 97 && c <= 122 ) ) 
-                    {
-                        IsCaps = false;
-                    }
-                    reset();	
-
-                    if(!IsCaps && !IsShift)
-                    {
-                            TempStr=VirtualKey[c];
-                    }
-                    else if(IsCaps && !IsShift)
-                    {
-                            TempStr=VirtualKeyCaps[c]; 
-                    }
-                    else if(!IsCaps && IsShift)
-                    {
-                            TempStr=VirtualKey[c];
-                    }
-                    else if(IsCaps && IsShift)
-                    {
-                        if(mode=='k')
-                        {
-                                TempStr=VirtualKeyCaps[c];
-                            }
-                            else if(mode=='m')
-                            {
-                                TempStr=VirtualKey[c];
-                            }
-                            else
-                            {
-                                document.getElementById(selectedField).value = c+' '+IsCaps+' '+IsShift+' '+mode;
-                            }
-                    }
-
-                    if(TempStr != undefined)
-                    document.getElementById(selectedField).value = document.getElementById(selectedField).value+TempStr;
-                    document.getElementById(selectedField).focus();
-
-            //	self.parent.updateText(document.getElementById('txtHindi').value);
-            }
-
-            function ButtonDown(c)
-            {
-                if(c==8)
-                {
-                    document.getElementById('bSpace').style.visibility="visible";
-                }
-                else if(c==9)
-                {
-                    document.getElementById('tab').style.visibility="visible";
-                }
-                else if(c==13)
-                {
-                    document.getElementById('enter').style.visibility="visible";
-                }
-                else if(c==16)
-                {
-                    IsShift=true;
-                    document.getElementById('ShiftL').style.visibility="visible";
-                    document.getElementById('ShiftR').style.visibility="visible";
-                }
-                else if(c==20)
-                {
-                    IsCaps = !IsCaps;
-                    document.getElementById('capsS').style.visibility="visible";
-                }
-                else if(c==32)
-                {
-                    document.getElementById('Space').style.visibility="visible";
-                }
-                else if(c==46)
-                {
-                    document.getElementById('delete').style.visibility="visible";
-                }
-                else
-                {
-                    document.getElementById('Butt').style.left=LeftButton[c]+'px';
-                    document.getElementById('Butt').style.top=TopButton[c]+'px';
-                    document.getElementById('Butt').style.visibility="visible";
-                }
-                reset();
-            }
-
-            function ButtonUp(c)
-            {
-                if(c==16)
-                {
-                    IsShift=false;
-                }
-
-                reset();
-
-                document.getElementById('Butt').style.visibility="hidden";
-                document.getElementById('Space').style.visibility="hidden";
-                document.getElementById('bSpace').style.visibility="hidden";
-                document.getElementById('delete').style.visibility="hidden";
-                document.getElementById('enter').style.visibility="hidden";
-                document.getElementById('tab').style.visibility="hidden";
-                if(!IsShift)
-                {
-                    document.getElementById('ShiftL').style.visibility="hidden";
-                    document.getElementById('ShiftR').style.visibility="hidden";
-                }
-                if(!IsCaps)
-                {
-                    document.getElementById('capsS').style.visibility="hidden";
-                }
-
-                document.getElementById(selectedField).focus();
-            }
-
-            function Shift()
-            {
-                if(document.getElementById('normal').style.visibility=="visible")
-                {
-                    document.getElementById('normal').style.visibility="hidden";
-                    document.getElementById('shift').style.visibility="visible";
-                }
-                else
-                {
-                    document.getElementById('normal').style.visibility="visible";
-                    document.getElementById('shift').style.visibility="hidden";
-                }
-            }
-
-            //function showKeyboard(field,div){
-            //    changeField(field);
-            //    if(selectedField != null){
-            //        divElem = document.getElementById(div);
-            //        visibilty = div.style.visibility;
-            //        divElem.innerHTML = inner;
-            //        if(visibilty == 'hidden'){
-            //            mainKB.style.visibility = "visible";
-            //            document.getElementById('top').style.visibility = "visible";
-            //            document.getElementById('normal').style.visibility = "visible";
-            //        }
-            //        else{
-            //            mainKB.style.visibility = "hidden";
-            //            document.getElementById('top').style.visibility = "hidden";
-            //            document.getElementById('normal').style.visibility = "hidden";
-            //        }
-            //    }
-            ////    document.getElementById('mainKeyboard').toggle();
-            //   // document.getElementById('top').style.visibility="visible"  
-            //}
-
-            function showKeyboard(field,div){
-                changeField(field);
-                //alert(document.getElementById(div));
-                if(selectedField != null){
-                    divElem = document.getElementById(div);
-                    visibilty = divElem.style.visibility;
-                    //console.log("texthi1:"+document.getElementById("textHi1").style.visibility);
-                    //console.log("texthi2:"+document.getElementById("textHi2").style.visibility);
-                    if(visibilty == 'hidden'){
-                        divElem.innerHTML = inner;
-                        divElem.style.visibility = "visible";
-                        //divElem.style.dislay = "block";
-                        document.getElementById('top').style.visibility = "visible";
-                        document.getElementById('normal').style.visibility = "visible";
-                    }
-                    else{
-                        divElem.style.visibility = "hidden";
-                        //divElem.style.dislay = "none";
-                        divElem.style.width="0";
-                        divElem.style.height="0";
-                        divElem.innerHTML = "";       
-                        //document.getElementById('top').style.visibility = "hidden";
-                        //document.getElementById('normal').style.visibility = "hidden";
-                    }
-                }
-            //    document.getElementById('mainKeyboard').toggle();
-               // document.getElementById('top').style.visibility="visible"  
-            }
+            divElem.style.visibility = "hidden";
+            //divElem.style.dislay = "none";
+            divElem.style.width="0";
+            divElem.style.height="0";
+            divElem.innerHTML = "";       
+            //document.getElementById('top').style.visibility = "hidden";
+            //document.getElementById('normal').style.visibility = "hidden";
+        }
+    }
+//    document.getElementById('mainKeyboard').toggle();
+   // document.getElementById('top').style.visibility="visible"  
+}
 
 
-            function changeField(field){
-                selectedField = field;
-            }
-        </script>
-        <script type="text/javascript">
-            function submitForm(){
-                if(validator() == true)
-                 $("#form").submit();
-            }
-            function validator(){
-                valid = true;
-                city = $("#city").val();
-                village = $("#vill").val();
-                //console.log(city.length==0+" === "+village.length==0);
-                if((city.length == 0 && village.length == 0)){
-                    valid=false;
-                    alert("Must Enter City or Village!!!");
-                }
-                else if((city.length > 0 && village.length > 0)){
-                    valid=false;
-                    alert("Do not enter both City and Village!!!");
-                }
-                
-                pin = $("#pin").val().toString();
-                if(pin.match(/^[1-9]\d{5}/) == null){
-                    valid=false;
-                    alert("Invalid Pin!!!");
-                }
-                
-                phone = $("#phone").val().toString();
-                //console.log(phone.match(/[a-zA-z]/));
-                if(phone.match(/[a-zA-z]/)!=null){
-                    valid=false;
-                    alert("Invalid Phone Number(s) entered!!!");
-                }
-                
-                return valid;
-            }
-        </script>      
-    </head>
-    <body>
-        <div id="mainKeyboard" style="visibility: hidden;">
+function changeField(field){
+    selectedField = field;
+}
+</script>
+<style>
+    #textHi1,#textHi2{
+        position: relative;
+    }
+    .input{
+       width:250px;
+       height:25px;
+       border: 1px solid black;
+    }
+    .label{
+       height:25px;
+       /*border: 1px solid black;*/
+       padding-top: 5px;
+    }
+    .asterik{
+        color: red;
+    }
+</style>
+</head>
+
+<body>
+    <div id="mainKeyboard" style="visibility: hidden;">
         <span id="Butt" style="z-index:1;position:absolute; top:0px; left:0px; visibility:hidden"><img id="shade" src="images/btn.gif" /></span>
         <span id="Space" style="z-index:1;position:absolute; top:81px; left:82px; visibility:hidden"><img src="images/space.gif" /></span>
         <span id="bSpace" style="z-index:1;position:absolute; top:0px; left:280px; visibility:hidden"><img src="images/bs.gif" /></span>
@@ -626,78 +644,115 @@
             </map>
         </div>
     </div>
-    
-        <div>
-            <p>ADD CUSTOMER:</p>                
-            <form method="POST" id="form" name="form">
-                <table>
-                    <tr>
-                        <td class="cellOne">Customer Name [ENGLISH]:<span class="asterik">*</span></td>
-                        <td class="cellSec"><input id="nameEn" name="nameEn" class="textClass" type="text" maxlength="30" /></td>
-                    </tr>
-                    <tr>
-                        <td class="cellOne">Customer Name [HINDI]:<span class="asterik">*</span></td>
-                        <td class="cellSec">
-                            <input id="nameHi" name="nameHi" class="textClass" type="text" maxlength="30" onfocus="showKeyboard('nameHi','textHi1');" onblur="showKeyboard('nameHi','textHi1');"/>
-                            <div id="textHi1" style="visibility: hidden; border-collapse: collapse;float: right;"></div>                
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="cellOne">Address:<span class="asterik">*</span></td>
-                        <td class="cellSec"><input id="addr" class="textClass" type="text" maxlength="50" /></td>
-                    </tr>
-                    <tr>
-                        <td class="cellOne">Locality:<span class="asterik">*</span></td>
-                        <td class="cellSec"><input id="local" class="textClass" type="text" maxlength="50" /></td>
-                    </tr>
-                    <tr>
-                        <td class="cellOne">City:</td>
-                        <td class="cellSec"><input id="city" class="textClass" type="text" maxlength="30" /></td>
-                    </tr>
-                     <tr>
-                        <td class="cellOne">Village:</td>
-                        <td class="cellSec"><input id="vill" class="textClass" type="text" maxlength="30" /></td>
-                    </tr>
-                    <tr>
-                        <td class="cellOne">State:<span class="asterik">*</span></td>
-                        <td class="cellSec"><input id="state" class="textClass" type="text" maxlength="30" /></td>
-                    </tr>
-                    <tr>
-                        <td class="cellOne">PINCODE:<span class="asterik">*</span></td>
-                        <td class="cellSec"><input id="pin" class="textClass" type="text"  maxlength="6" /></td>
-                    </tr>
-                    <tr>
-                        <td class="cellOne">Amount Payable:</td>
-                        <td class="cellSec"><input id="addr" class="textClass" type="text"/></td>
-                    </tr>
-                    <tr>
-                        <td class="cellOne">Contact Phone No.</td>
-                        <td class="cellSec"><input id="phone" class="textClass" type="text" maxlength="40"/></td>
-                    </tr>
-                </table>
-                <span class="asterik">*</span> Fields are mandatory
-               
-            </form>
-            <button onclick="submitForm();">SUBMIT</button> 
+    <div id="formDiv" style="z-index:1;position: absolute;">
+        <p>ADD CUSTOMER:</p>
+        <div id="labelDiv" style="float: left;">
+            <div class="label">Customer Name [ENGLISH]:<span class="asterik">*</span> </div><br/>
+            <div class="label">Customer Name [HINDI]:<span class="asterik">*</span></div><br/>
+            <div class="label">Address:<span class="asterik">*</span></div><br/>
+            <div class="label">Locality:</div><br/>
+            <div class="label">City: </div><br/>
+            <div class="label">Village:</div><br/>
+            <div class="label">State:<span class="asterik">*</span></div><br/>
+            <div class="label">PINCODE:<span class="asterik">*</span></div><br/>
+            <div class="label">Amount Payable:</div><br/>
+            <div class="label">Amount Receive:</div><br/>
+            <div class="label">Contact Phone No.:</div><br/>
+            <div class="label">Comment:</div>
+            <span class="asterik">*</span> Fields are mandatory 
         </div>
-        <script>
-            if(navigator.appName!= "Mozilla")
-            {
-                document.getElementById('textHi1').onkeydown=checkCode;
-                document.getElementById('textHi1').onkeypress=writeKeyPressed;
-                document.getElementById('textHi1').onkeyup=restoreCode;
-//                document.getElementById('txtHindi2').onkeydown=checkCode;
-//                document.getElementById('txtHindi2').onkeypress=writeKeyPressed;
-//                document.getElementById('txtHindi2').onkeyup=restoreCode;
+        <form action="add_cust.php" id="form" name="form" method="POST">
+            
+            <input type="text" id="nameEn" name="nameEn" class="input" maxlength="30" autofocus required />
+            <br/> <br/>
+            <input type="text" class="input" id="txtHindi" name="nameHi" onfocus="showKeyboard('txtHindi','textHi1','in');" onblur="showKeyboard('txtHindi','textHi1','out');" required />
+            <div id="textHi1" style="visibility: hidden; border-collapse: collapse;float: right; "></div>
+            <br/> <br/>
+            <input id="addr" name="addr" class="input" type="text" maxlength="50" required />
+            <br/> <br/>
+            <input id="local" name="local" class="input" type="text" maxlength="50" />
+            <br/> <br/>
+            <input id="city" name="city" class="input" type="text" maxlength="30" />
+            <br/> <br/>
+            <input id="vill" name="vill" class="input" type="text" maxlength="30" />
+            <br/> <br/>
+            <input id="state" name="state" class="input" type="text" maxlength="30" required />
+            <br/> <br/>
+            <input id="pin" name="pin" class="input" type="text"  maxlength="6" required />
+            <br/> <br/>
+            <input id="amtp" name="amtp" class="input" type="text"/>
+            <br/> <br/>
+            <input id="amtr" name="amtr" class="input" type="text"/>
+            <br/> <br/>
+            <input id="phone" name="phone" class="input" type="text" maxlength="40"/>
+            <br/> <br/>
+            <input id="comnt" name="comnt" class="input" type="text" maxlength="100"/>
+        </form>
+		<br/><br/>
+        <button onclick="submitForm();">SUBMIT</button>
+        <?= $insertSTATUS?'<span>Insert Successful</span>':null; ?>
+    </div>
+    
+    <script>
+        if(navigator.appName!= "Mozilla")
+        {
+            document.getElementById('txtHindi').onkeydown=checkCode;
+            document.getElementById('txtHindi').onkeypress=writeKeyPressed;
+            document.getElementById('txtHindi').onkeyup=restoreCode;
+            document.getElementById('shift').onkeydown=checkCode;
+            document.getElementById('shift').onkeypress=writeKeyPressed;
+            document.getElementById('shift').onkeyup=restoreCode;
+            document.getElementById('normal').onkeydown=checkCode;
+            document.getElementById('normal').onkeypress=writeKeyPressed;
+            document.getElementById('normal').onkeyup=restoreCode;
+            document.getElementById('caps').onkeydown=checkCode;
+            document.getElementById('caps').onkeypress=writeKeyPressed;
+            document.getElementById('caps').onkeyup=restoreCode;
+        }
+        else
+        {
+            document.addEventListener("onkeydown",checkCode,true);
+            document.addEventListener("onkeypress",writeKeyPressed,false);
+            document.addEventListener("onkeyup",restoreCode,true);
+
+        }
+        var inner = document.getElementById('mainKeyboard').innerHTML;
+        document.getElementById('mainKeyboard').innerHTML=null;
+        function submitForm(){
+                if(validator() == true)
+                 $("#form").submit();
             }
-            else
-            {
-                document.addEventListener("onkeydown",checkCode,true);
-                document.addEventListener("onkeypress",writeKeyPressed,false);
-                document.addEventListener("onkeyup",restoreCode,true);
+            function validator(){
+                valid = true;
+                city = $("#city").val();
+                village = $("#vill").val();
+                //console.log(city.length==0+" === "+village.length==0);
+                if((city.length == 0 && village.length == 0)){
+                    valid=false;
+                    alert("Must Enter City or Village!!!");
+                }
+                else if((city.length > 0 && village.length > 0)){
+                    valid=false;
+                    alert("Do not enter both City and Village!!!");
+                }
+                
+                pin = $("#pin").val().toString();
+                if(pin.match(/^[1-9]\d{5}/) == null){
+                    valid=false;
+                    alert("Invalid Pin!!!");
+                }
+                
+                phone = $("#phone").val().toString();
+                //console.log(phone.match(/[a-zA-z]/));
+                if(phone.match(/[a-zA-z]/)!=null){
+                    valid=false;
+                    alert("Invalid Phone Number(s) entered!!!");
+                }
+                
+                return valid;
             }
-            var inner = document.getElementById('mainKeyboard').innerHTML;
-            document.getElementById('mainKeyboard').innerHTML=null;
-        </script>
-    </body>
+    </script>
+    
+</body>
 </html>
+
