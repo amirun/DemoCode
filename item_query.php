@@ -8,7 +8,7 @@
             $queryallrows = mysqli_fetch_all($query_result);
             echo json_encode($queryallrows);
         }
-        if($task == 'categoryInsert'){
+        else if($task == 'categoryInsert'){
             !empty($_POST['catEn'])?$catEn = mysqli_real_escape_string ( $con, $_POST['catEn'] ):$catEn =null;
             !empty($_POST['catHi'])?$catHi = mysqli_real_escape_string ( $con, $_POST['catHi'] ):$catHi =null;
             !empty($_POST['subEn'])?$subEn = mysqli_real_escape_string ( $con, $_POST['subEn'] ):$subEn =null;
@@ -21,5 +21,21 @@
             else
                 echo "fail";
         }
+		
     }
+	else{
+		!empty($_POST['nameEn'])?$nameEn = mysqli_real_escape_string ( $con, $_POST['nameEn'] ):$nameEn =null;
+		!empty($_POST['txtHindi3'])?$nameHi = "'".mysqli_real_escape_string ( $con, $_POST['txtHindi3'] )."'":$nameHi = 'NULL';
+		!empty($_POST['catID'])?$catID = mysqli_real_escape_string ( $con, $_POST['catID'] ):$catID =null;
+		!empty($_POST['cost'])?$cost = mysqli_real_escape_string ( $con, $_POST['cost'] ):$cost =null;
+		if($nameEn!=null){
+			$sql = "INSERT INTO `item`(`item_name`, `item_name_hi`, `categoryid`, `cost_price`, `DOC`, `DOM`) "
+					." VALUES ('$nameEn',$nameHi,$catID,$cost,CURDATE(),CURDATE())";
+			$query_result = mysqli_query($con,$sql);
+            if($query_result){
+				echo "ITEM INSERTED SUCCESSFULLY";
+                header( "refresh:2;url=add_item.php" );
+			}
+		}
+	}
 ?>
