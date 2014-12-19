@@ -13,14 +13,15 @@
     <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
     <script type="text/javascript" src="../../js/jquery-1.11.1.min.js"></script>
     <script type="text/javascript">
-
+		var categList;
         $(function() {
             $.ajax({
                 type: "POST",
                 url: "item_query.php",
                 data: { "task" : "categorySelect"},
                 success: function(jsonObj){
-                        fillCategtable(jQuery.parseJSON(jsonObj));
+						categList = jQuery.parseJSON(jsonObj);
+                        fillCategtable();
                     }
             });
         });
@@ -48,7 +49,7 @@
                     }
             });
         }
-        function fillCategtable(categList){
+        function fillCategtable(){
             tbody = document.getElementById("categoryBody");
             tbody.innerHTML = "";
             for (i=0;i<categList.length;i++) {
@@ -64,6 +65,41 @@
             }
         }
         
+		function validatenumber(field) {
+		  var regex = /^[0-9]*(?:\.\d{2})?$/;    // allow only numbers [0-9] 
+		  if( !regex.test(field.value) ) {
+			 field.value=null;
+			 field.focus();
+		  }
+		}
+		function submitItemForm(){
+			nameEn = $("#nameEn").val();
+			nameHi = $("#txtHindi3").val();
+			catID  = $("#catID").val();
+			cost   = $("#cost").val();
+			if(nameEn.length == 0 || nameHi.length == 0 || catID.length == 0 || cost.length == 0){
+				alert("Please fill all fields before submitting.");
+				return;
+			}
+			if(isNaN(catID)){
+				alert("Only Valid Category IDs allowed");
+			}
+			else{
+				categIDNum = Number(catID);
+				found=false;
+				for(i=0;i<categList.length;i++){
+					category = categList[i];
+					if(Number(category[0]) == categIDNum){
+						$("#itemForm").submit();
+						found = true;
+						//alert("SUBMIT");
+					}
+				}
+				if(!found)
+					alert("Category ID not found!!!");
+			}
+			
+		}
     </script>
     <script language=javascript type="text/javascript">
 
@@ -455,7 +491,7 @@
             table-layout: fixed;
             border-collapse: collapse;
         }
-        th, td {
+        #categTable th, td {
             padding: 2px;
             text-align: left;
         }
@@ -466,7 +502,7 @@
         td:nth-child(4), th:nth-child(4) { width: 135px; }
         td:nth-child(5), th:nth-child(5) { width: 135px; }
 
-        thead {
+        #categTable thead {
             background-color: #333;
             color: #FDFDFD;
             position: absolute;
@@ -476,7 +512,7 @@
             margin-top: 30px;
         }
 
-        tbody tr:nth-child(even) {
+        #categTable tbody tr:nth-child(even) {
             background-color: #DDD;
         }
         #addCat{
@@ -489,8 +525,7 @@
             height:28px;
             padding: 0px;
         }
-        #textHi1,#textHi2{
-/*            display: none;*/
+        #textHi1,#textHi2,#textHi3{
             position: relative;
         }
         #rightTableContainer{
@@ -498,6 +533,17 @@
             height: 200px;
             overflow-y: scroll;
         }
+		.asterik{
+			color: red;
+		}
+		#itemTable td{
+			border: none;
+			width: auto;
+		}
+		#itemTable td input{
+			width:200px;
+			height: 30px;
+		}
     </style>
 </head>
 <body>
@@ -724,7 +770,34 @@
         </div>
     </div>
     <div id="main">
-        <div id="leftHolder"></div>
+        <div id="leftHolder">
+			<h4>Add New Item:</h4>
+			<div id="leftTableContainer">
+				<form id="itemForm" method="POST" action="item_query.php">
+					<table id="itemTable">
+						<tr>
+							<td>Item Name:<span class="asterik">*</span></td>
+							<td><input id="nameEn" name="nameEn" type="text" required /></td>
+						</tr>
+						<tr>
+							<td>Name[Hindi]:<span class="asterik">*</span></td>
+							<td><input type="text" id="txtHindi3" name="txtHindi3" onfocus="showKeyboard('txtHindi3','textHi3','in');" onblur="showKeyboard('txtHindi3','textHi3','out');"/>
+								<div id="textHi3" style="visibility: hidden; border-collapse: collapse; ">
+							</td>
+						</tr>
+						<tr>
+							<td>Category ID:<span class="asterik">*</span></td>
+							<td><input id="catID" name="catID" type="text" required /></td>
+						</tr>
+						<tr>
+							<td>Cost Price:<span class="asterik">*</span></td>
+							<td><input id="cost" name="cost" type="text" onblur="validatenumber(this)" required /></td>
+						</tr>
+					</table>
+				</form>
+				<button onclick="submitItemForm();">ADD ITEM</button>
+			</div>			
+		</div>
         <div id="rightHolder">
             <h4>Categories:</h4>
             <div id="rightTableContainer">
@@ -765,6 +838,9 @@
             document.getElementById('txtHindi2').onkeydown=checkCode;
             document.getElementById('txtHindi2').onkeypress=writeKeyPressed;
             document.getElementById('txtHindi2').onkeyup=restoreCode;
+			document.getElementById('txtHindi3').onkeydown=checkCode;
+            document.getElementById('txtHindi3').onkeypress=writeKeyPressed;
+            document.getElementById('txtHindi3').onkeyup=restoreCode;
         }
         else
         {
