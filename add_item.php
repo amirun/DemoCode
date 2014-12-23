@@ -13,18 +13,64 @@
     <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
     <script type="text/javascript" src="../../js/jquery-1.11.1.min.js"></script>
     <script type="text/javascript">
-		var categList;
+		//var categList;
         $(function() {
             $.ajax({
                 type: "POST",
                 url: "item_query.php",
                 data: { "task" : "categorySelect"},
                 success: function(jsonObj){
-						categList = jQuery.parseJSON(jsonObj);
-                        fillCategtable();
+						populateSelCateg(jQuery.parseJSON(jsonObj));
                     }
             });
         });
+		function populateSelCateg(jsonObj){
+			catID = document.getElementById("catID");
+			for (i=0;i<jsonObj.length;i++) {
+				temp = jsonObj[i];
+				option = '<option value="'+temp[0]+'">'+temp[0].toUpperCase()+'</option>'
+				catID.innerHTML+=option;
+			}
+		}
+		
+		function getSubCat(){
+			catID = $("#catID").val();
+			if(catID != '0'){
+				$.ajax({
+                type: "POST",
+                url: "item_query.php",
+                data: { "task" : "getSubCat", "category" : catID},
+                success: function(jsonObj){
+						populateSelSub(jQuery.parseJSON(jsonObj));
+						fillCategtable(jQuery.parseJSON(jsonObj));
+                    }
+				});
+			}
+		}
+		function populateSelSub(jsonObj){
+			subID = document.getElementById("subID");
+			for (i=0;i<jsonObj.length;i++) {
+				temp = jsonObj[i];
+				option = '<option value="'+temp[0]+'">'+temp[3].toUpperCase()+'</option>'
+				subID.innerHTML+=option;
+			}
+		}
+		function fillCategtable(categList){
+            tbody = document.getElementById("categoryBody");
+            tbody.innerHTML = "";
+            for (i=0;i<categList.length;i++) {
+                category = categList[i];
+                tr = document.createElement("tr");
+                trContent='<td>'+category[0]+'</td>';
+                trContent=trContent+'<td>'+category[1]+'</td>';
+                trContent=trContent+'<td>'+category[2]+'</td>';
+                trContent=trContent+'<td>'+category[3]+'</td>';
+                trContent=trContent+'<td>'+category[4]+'</td>';
+                tr.innerHTML = trContent;
+                tbody.appendChild(tr);
+            }
+        }
+        
         function insertCategory(){
             catEn = $("#catEn").val();
             catHi = $("#txtHindi1").val();
@@ -49,21 +95,6 @@
                     }
             });
         }
-        function fillCategtable(){
-            tbody = document.getElementById("categoryBody");
-            tbody.innerHTML = "";
-            for (i=0;i<categList.length;i++) {
-                category = categList[i];
-                tr = document.createElement("tr");
-                trContent='<td>'+category[0]+'</td>';
-                trContent=trContent+'<td>'+category[1]+'</td>';
-                trContent=trContent+'<td>'+category[2]+'</td>';
-                trContent=trContent+'<td>'+category[3]+'</td>';
-                trContent=trContent+'<td>'+category[4]+'</td>';
-                tr.innerHTML = trContent;
-                tbody.appendChild(tr);
-            }
-        }
         
 		function validatenumber(field) {
 		  var regex = /^[0-9]*(?:\.\d{2})?$/;    // allow only numbers [0-9] 
@@ -75,28 +106,14 @@
 		function submitItemForm(){
 			nameEn = $("#nameEn").val();
 			nameHi = $("#txtHindi3").val();
-			catID  = $("#catID").val();
+			catID  = $("#subID").val();
 			cost   = $("#cost").val();
-			if(nameEn.length == 0 || nameHi.length == 0 || catID.length == 0 || cost.length == 0){
+			if(nameEn.length == 0 || nameHi.length == 0 || catID == '0' || cost.length == 0){
 				alert("Please fill all fields before submitting.");
 				return;
 			}
-			if(isNaN(catID)){
-				alert("Only Valid Category IDs allowed");
-			}
 			else{
-				categIDNum = Number(catID);
-				found=false;
-				for(i=0;i<categList.length;i++){
-					category = categList[i];
-					if(Number(category[0]) == categIDNum){
-						$("#itemForm").submit();
-						found = true;
-						//alert("SUBMIT");
-					}
-				}
-				if(!found)
-					alert("Category ID not found!!!");
+				$("#itemForm").submit();
 			}
 			
 		}
@@ -519,9 +536,9 @@
             float: left;
             text-align: left;
         }
-        #addCat input{
+        #addCat input, select{
             float: right;
-            width:160px;
+            width:100%;
             height:28px;
             padding: 0px;
         }
@@ -782,12 +799,16 @@
 						<tr>
 							<td>Name[Hindi]:<span class="asterik">*</span></td>
 							<td><input type="text" id="txtHindi3" name="txtHindi3" onfocus="showKeyboard('txtHindi3','textHi3','in');" onblur="showKeyboard('txtHindi3','textHi3','out');"/>
-								<div id="textHi3" style="visibility: hidden; border-collapse: collapse; ">
+								<div id="textHi3" style="visibility: hidden; border-collapse: collapse; "></div>
 							</td>
 						</tr>
 						<tr>
 							<td>Category ID:<span class="asterik">*</span></td>
-							<td><input id="catID" name="catID" type="text" required /></td>
+							<td><select id="catID" name="catID" onchange="getSubCat()"><option value="0">--Select--</option></select></td>
+						</tr>
+						<tr>
+							<td>Sub-Category ID:<span class="asterik">*</span></td>
+							<td><select id="subID" name="subID"><option value="0">--Select--</option></select></td>
 						</tr>
 						<tr>
 							<td>Cost Price:<span class="asterik">*</span></td>
@@ -811,7 +832,9 @@
                             <th></th>   
                         </tr>
                     </thead>
-                    <tbody id="categoryBody"></tbody>
+                    <tbody id="categoryBody">
+						<tr><td colspan="4" style="width: 100%;border: none;">Select Category To See All Sub Categories</td></tr>
+					</tbody>
                 </table>
             </div>
             <br/><br/>
