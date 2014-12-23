@@ -3,11 +3,18 @@
     !empty($_POST['task'])?$task = mysqli_real_escape_string ( $con, $_POST['task'] ):$task =null;
     if($task != null){
         if($task == 'categorySelect'){
-            $sql = "Select * from `category`";
+            $sql = "SELECT DISTINCT(`category`) FROM `category` ";
             $query_result = mysqli_query($con,$sql);
             $queryallrows = mysqli_fetch_all($query_result);
             echo json_encode($queryallrows);
         }
+		else if($task == 'getSubCat'){
+			$category = mysqli_real_escape_string ( $con, $_POST['category'] );
+			$sql = "SELECT * FROM `category` WHERE `category` = '$category'";
+			$query_result = mysqli_query($con,$sql);
+            $queryallrows = mysqli_fetch_all($query_result);
+            echo json_encode($queryallrows);
+		}
         else if($task == 'categoryInsert'){
             !empty($_POST['catEn'])?$catEn = mysqli_real_escape_string ( $con, $_POST['catEn'] ):$catEn =null;
             !empty($_POST['catHi'])?$catHi = mysqli_real_escape_string ( $con, $_POST['catHi'] ):$catHi =null;
@@ -26,7 +33,7 @@
 	else{
 		!empty($_POST['nameEn'])?$nameEn = mysqli_real_escape_string ( $con, $_POST['nameEn'] ):$nameEn =null;
 		!empty($_POST['txtHindi3'])?$nameHi = "'".mysqli_real_escape_string ( $con, $_POST['txtHindi3'] )."'":$nameHi = 'NULL';
-		!empty($_POST['catID'])?$catID = mysqli_real_escape_string ( $con, $_POST['catID'] ):$catID =null;
+		!empty($_POST['subID'])?$catID = mysqli_real_escape_string ( $con, $_POST['subID'] ):$catID =null;
 		!empty($_POST['cost'])?$cost = mysqli_real_escape_string ( $con, $_POST['cost'] ):$cost =null;
 		if($nameEn!=null){
 			$sql = "INSERT INTO `item`(`item_name`, `item_name_hi`, `categoryid`, `cost_price`, `DOC`, `DOM`) "
